@@ -127,4 +127,18 @@ router.get('/admin/deals-complete', auth, adminOnly, async (req, res) => {
     }
 })
 
+// ADMIN - Get total number of loans that are active (isComplete: false)
+router.get('/admin/deals-active', auth, adminOnly, async (req, res) => {
+    try {
+        // Get all deals that are complete
+        const deals = await Deal.find({isComplete: false})
+
+        const activeDeals = deals.length;
+
+        res.send({totalActiveDeals: activeDeals})
+    } catch (err) {
+        res.status(400).send({ error: err.message })
+    }
+})
+
 export default router
