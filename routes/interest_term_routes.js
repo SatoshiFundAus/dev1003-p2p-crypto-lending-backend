@@ -39,8 +39,43 @@ router.get('/interest-terms/:id', auth, async (req, res) => {
 
 // ADMIN Route - Create an interest term
 router.post('/admin/interest-terms', auth, adminOnly, async (req, res) => {
-    //TODO: Finish Route
+    try {
+        // Get the bodyData from req.body
+        const bodyData = req.body
+
+        const interestTerm = {
+            loan_length: bodyData.loan_length,
+            interest_rate: bodyData.interest_rate
+        }
+
+        // Add the new Interest Term to the database
+        InterestTerm.create(interestTerm)
+
+        res.status(201).send({ message: "New interest Term created", post: interestTerm})
+        
+
+    } catch (err) {
+        res.status(400).send({error: err.message})
+    }
 })
+
+// ADMIN Route - Delete an interest term by ID
+router.delete('/admin/interest-terms/:id', auth, adminOnly, async (req, res) => {
+    try {
+        // Get the ID from the params
+        const interestId = req.params.id
+
+        const interestTerm = await InterestTerm.findByIdAndDelete(interestId)
+        if (!interestTerm) {
+            res.status(404).send({error: `Interest term with ID ${interestId} not found`})
+        }
+        res.send({message : "Interest Term deleted"})
+
+    } catch (err) {
+        res.status(400).send({error: err.message})
+    }
+})
+
 
 
 
