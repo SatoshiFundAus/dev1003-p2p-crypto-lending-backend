@@ -40,7 +40,9 @@ dealSchema.pre('save', async function (next) {
       }
     })
 
+    // Destructure the populated loanDetails from this Deal
     const loanDetails = this.loanDetails
+    // If either loanDetails or interest_term is missing, return an error and skip saving
     if (!loanDetails || !loanDetails.interest_term) {
       return next(new Error('Loan details not found'))
     }
