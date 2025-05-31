@@ -8,6 +8,12 @@ Developed with Node.js, Express, and MongoDB, the app prioritizes modular archit
 
 Built as part of a collaborative full-stack project, SatoshiFund showcases scalable backend design and practical implementation of modern web development best practices.
 
+### Live Backend:  
+The backend is currently live and available at:  
+[https://dev1003-p2p-crypto-lending-backend.onrender.com](https://dev1003-p2p-crypto-lending-backend.onrender.com)  
+All API routes can be tested from this base URL.
+
+
 ### Features
 - User registration and login with JWT authentication
 - Wallet creation and management
@@ -108,19 +114,12 @@ This project does not currently handle production-grade transaction throughput o
 
 ## Code Style
 
-This project uses automated code formatting and linting tools to ensure consistency and catch potential errors early during development.
-
-### Tools Used
-- **ESLint** with the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) — for identifying and fixing problematic patterns in code.
-- **Prettier** — for automatic code formatting (integrated with ESLint to avoid conflicts).
-
-These tools help maintain high code quality, especially in a team setting, by enforcing style rules and eliminating common syntax errors.
+While this project does not currently use an automated linter or formatter like ESLint or Prettier, code consistency has been maintained through team conventions and IDE defaults. Variable naming, indentation, and file structure follow widely accepted JavaScript best practices to ensure readability and maintainability.
 
 ### Style Conventions
 The following conventions are enforced:
 
 - Use of ES modules (`import/export`)
-
 - Use ES modules (import/export) syntax
 - 2-space indentation
 - Single quotes for strings
@@ -145,9 +144,8 @@ router.get('/example', auth, async (req, res) => {
 })
 ```
 
-The use of these tools supports collaboration and makes the codebase more maintainable as the project scales.
+If this project were to scale, adopting a formal style guide (e.g., ESLint with Airbnb config) would be recommended to enforce uniform code standards and catch potential errors early in development.
 
-### Hosting
 
 ## Installation
 
