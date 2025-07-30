@@ -1,6 +1,6 @@
 // tests/models/wallet.test.js
+import 'dotenv/config'
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import Wallet from '../../models/wallet.js';
 import User from '../../models/user.js';
 import Cryptocurrency from '../../models/cryptocurrency.js';
@@ -8,16 +8,13 @@ import Cryptocurrency from '../../models/cryptocurrency.js';
 let mongo;
 
 beforeAll(async () => {
-    mongo = await MongoMemoryServer.create()
-    const uri = mongo.getUri()
+    const uri = process.env.DATABASE_URL
 
     await mongoose.connect(uri)
 })
 
 afterAll(async () => {
-    await mongoose.connection.dropDatabase()
     await mongoose.connection.close()
-    await mongo.stop()
 })
 
 afterEach(async () => {

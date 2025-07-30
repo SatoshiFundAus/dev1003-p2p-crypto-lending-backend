@@ -1,0 +1,89 @@
+name: BTC Lending Backend
+
+services:
+
+
+  mongo:
+    image: mongo
+    container_name: btc-mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  #  Development API service using the "development" stage in Dockerfile
+  api-dev:
+    image: btclendingbackend/api:1.0.0-dev
+    build:
+      context: .
+      target: development
+      args:
+        - PORT=3000
+        - NODE_ENV=development
+    env_file: .env
+    depends_on:
+      - mongo
+    environment:
+      - DATABASE_URL=mongodb://mongo:27017/btc-lending
+      - PORT=${DEV_PORT:-3000}
+      - NODE_ENV=development
+    ports:
+      - "${DEV_PORT:-3000}:3000"
+
+
+  api-prod:
+    image: btclendingbackend/api:1.0.0-prod
+    build:
+      context: .
+      target: production
+      args:
+        - PORT=3000
+        - NODE_ENV=production
+    # In production, secrets would be injected using GitHub Actions' encrypted secrets.
+    # This has been done for my GitHub Workflow in the /.github/workflows
+    env_file: .env
+    depends_on:
+      - mongo
+    environment:
+      - DATABASE_URL=mongodb://mongo:27017/btc-lending
+      - PORT=${PROD_PORT:-3000}
+      - NODE_ENV=production
+    ports:
+      - "${PROD_PORT:-3001}:3000"
+
+  seed:
+    image: btclendingbackend/seed:1.0.0-dev
+    build:
+      context: .
+      args:
+        - NODE_ENV=development
+        - PORT=3000
+    command: ["npm", "run", "seed"]
+    depends_on:
+      - mongo
+    environment:
+      - DATABASE_URL=mongodb://mongo:27017/btc-lending
+
+  test:
+    image: btclendingbackend/test:1.0.0-dev
+    build:
+      context: .
+      target: test
+      args:
+        - NODE_ENV=test
+    command: ["npm", "run", "test"]
+    depends_on:
+      - mongo
+      - api-dev
+    environment:
+      - DATABASE_URL=mongodb://mongo:27017/test-btc-lending
+
+# Using volumes like this stores the data in a Docker-managed location
+volumes:
+  mongodb-data:
+    driver: local

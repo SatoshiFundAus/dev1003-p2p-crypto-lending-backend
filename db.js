@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 // Connect to MongoDB
 export async function connect() {
-    await mongoose.connect(process.env.MONGODB_URI)
+    await mongoose.connect(process.env.DATABASE_URL)
     console.log(mongoose.connection.readyState == 1 ? "Connected to MongoDB" : "Failed to connect to MongoDB")
 }
 

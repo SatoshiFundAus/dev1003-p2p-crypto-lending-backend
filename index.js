@@ -16,7 +16,7 @@ import cryptocurrency_routes from './routes/cryptocurrency_routes.js'
 import health_routes from './routes/health_routes.js'
 
 const app = express()
-const port = 8080
+const port = 3000
 
 // Middleware
 app.use(helmet({

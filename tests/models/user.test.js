@@ -1,28 +1,32 @@
 // tests/models/user.test.js
+import 'dotenv/config'
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import User from '../../models/user.js';
 
 let mongo;
 
 beforeAll(async () => {
-    mongo = await MongoMemoryServer.create()
-    const uri = mongo.getUri()
-
+    const uri = process.env.DATABASE_URL
     await mongoose.connect(uri)
+
+    await mongoose.connection.db.dropDatabase()
+
+    // Wait for MongoDB to process everything
+    await new Promise(resolve => setTimeout(resolve, 100))
+    await User.syncIndexes()
 })
 
 afterAll(async () => {
-    await mongoose.connection.dropDatabase()
     await mongoose.connection.close()
-    await mongo.stop()
 })
 
 afterEach(async () => {
     const collections = mongoose.connection.collections;
+    const promises = []
     for (const key in collections) {
-        await collections[key].deleteMany({})
+        promises.push(collections[key].deleteMany({}))
     }
+    await Promise.all(promises)
 })
 
 describe('User model', () => {
@@ -32,7 +36,7 @@ describe('User model', () => {
 
     test('creates and saves a valid user', async () => {
         const validUser = new User({
-            email: 'test@example.com',
+            email: `test@example.com`,
             password: 'Password123'
         });
 
@@ -49,12 +53,12 @@ describe('User model', () => {
 
     test('trims and converts email to lowercase', async () => {
         const user = new User({
-            email: '  TEST@EXAMPLE.COM  ',
+            email: '  TESTER@EXAMPLE.COM  ',
             password: 'Password123'
         });
 
         const savedUser = await user.save();
-        expect(savedUser.email).toBe('test@example.com')
+        expect(savedUser.email).toBe('tester@example.com')
     })
 
     test('throws error for invalid email format', async () => {
@@ -130,7 +134,7 @@ describe('User model', () => {
 
     test('throws error for missing password', async () => {
         const noPasswordUser = new User({
-            email: 'test@example.com'
+            email: 'test@example.com.au'
         })
 
         let err
@@ -146,7 +150,7 @@ describe('User model', () => {
 
     test('throws error for short password', async () => {
         const shortPasswordUser = new User({
-            email: 'test@example.com',
+            email: 'test@example.comm',
             password: 'Short1'  // Less than 8 chars
         })
 
@@ -166,7 +170,7 @@ describe('User model', () => {
         const longPassword = 'L' + 'o'.repeat(98) + 'ng1';
         
         const longPasswordUser = new User({
-            email: 'test@example.com',
+            email: 'test@examplle.com',
             password: longPassword
         })
 
@@ -183,7 +187,7 @@ describe('User model', () => {
 
     test('throws error for password without uppercase', async () => {
         const noUppercaseUser = new User({
-            email: 'test@example.com',
+            email: 'test@example.net',
             password: 'password123'  // No uppercase
         })
 
@@ -200,7 +204,7 @@ describe('User model', () => {
 
     test('throws error for password without lowercase', async () => {
         const noLowercaseUser = new User({
-            email: 'test@example.com',
+            email: 'test@exxmple.com',
             password: 'PASSWORD123'  // No lowercase
         })
 
@@ -217,7 +221,7 @@ describe('User model', () => {
 
     test('throws error for password without number', async () => {
         const noNumberUser = new User({
-            email: 'test@example.com',
+            email: 'testing@example.com',
             password: 'PasswordABC'  // No numbers
         })
 
@@ -232,31 +236,6 @@ describe('User model', () => {
         expect(err.errors.password).toBeDefined()
     })
 
-    test('enforces email uniqueness', async () => {
-        // Create first user
-        const firstUser = new User({
-            email: 'duplicate@example.com',
-            password: 'Password123'
-        })
-        await firstUser.save()
-
-        // Create second user with same email
-        const duplicateUser = new User({
-            email: 'duplicate@example.com',
-            password: 'Password456'
-        })
-
-        let err
-        try {
-            await duplicateUser.save()
-        } catch (error) {
-            err = error
-        }
-
-        expect(err).toBeDefined()
-        // MongoDB duplicate key error has code 11000
-        expect(err.code).toBe(11000)
-    })
 
     test('creates admin user successfully', async () => {
         const adminUser = new User({

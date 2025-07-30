@@ -1,15 +1,17 @@
-import { Schema, model } from 'mongoose'
+import mongoose, { Schema, model } from 'mongoose'
 import User from './user.js'
 import LoanRequest from './loan_request.js'
 
 const dealSchema = new Schema({
   lenderId: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   },
   loanDetails: {
     type: Schema.Types.ObjectId,
-    ref: 'LoanRequest'
+    ref: 'LoanRequest',
+    required: true
   },
   isComplete: {
     type: Boolean,
@@ -26,30 +28,29 @@ const dealSchema = new Schema({
 // Pre-save hook to set expectedCompletionDate
 dealSchema.pre('save', async function (next) {
   if (!this.isModified('loanDetails') && this.expectedCompletionDate) {
-    // If loanDetails didn't change and expectedCompletionDate is set, skip
     return next()
   }
 
   try {
-    // Populate loanDetails to access loan term and creation date
-    await this.populate({
-      path: 'loanDetails',
-      populate: {
-        path: 'interest_term',
-        model: 'InterestTerm'
-      }
-    })
+    const loanDetails = await LoanRequest.findById(this.loanDetails).populate('interest_term')
 
-    const loanDetails = this.loanDetails
-    if (!loanDetails || !loanDetails.interest_term) {
-      return next(new Error('Loan details not found'))
+    if (!loanDetails) {
+      return next(new Error('LoanRequest document not found'))
     }
 
-    // loan_length is in months on LoanRequest model
-    const loanTermMonths = loanDetails.interest_term.loan_length
+    if (!loanDetails.interest_term) {
+      return next(new Error('LoanRequest missing interest_term'))
+    }
+
+    const interestTerm = loanDetails.interest_term
+
+    if (!interestTerm || typeof interestTerm.loan_length !== 'number') {
+      return next(new Error('Interest term is missing or invalid'))
+    }
+
+    const loanTermMonths = interestTerm.loan_length
     const creationDate = loanDetails.createdAt || new Date()
 
-    // Calculate expectedCompletionDate by adding loanTerm months to creationDate
     const expectedDate = new Date(creationDate)
     expectedDate.setMonth(expectedDate.getMonth() + loanTermMonths)
 
@@ -60,6 +61,8 @@ dealSchema.pre('save', async function (next) {
     next(err)
   }
 })
+
+
 
 const Deal = model('Deal', dealSchema)
 

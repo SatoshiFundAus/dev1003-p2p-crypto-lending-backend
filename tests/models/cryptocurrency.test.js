@@ -1,14 +1,16 @@
 // tests/models/cryptocurrency.test.js
+import 'dotenv/config'
 import mongoose from 'mongoose'
-import { MongoMemoryServer } from 'mongodb-memory-server'
 import Cryptocurrency from '../../models/cryptocurrency.js' // adjust if necessary
 
 let mongo
 
 beforeAll(async () => {
-  mongo = await MongoMemoryServer.create()
-  const uri = mongo.getUri()
+  const uri = process.env.DATABASE_URL
 
+  if (!uri) {
+    throw new Error('DATABASE_URL environment variable not set')
+  }
   await mongoose.connect(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -16,9 +18,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await mongoose.connection.dropDatabase()
   await mongoose.connection.close()
-  await mongo.stop()
 })
 
 afterEach(async () => {
@@ -32,9 +32,7 @@ describe('Cryptocurrency model', () => {
   it('should be defined', () => {
     expect(Cryptocurrency).toBeDefined()
   })
-})
 
-describe('Cryptocurrency Model', () => {
   test('creates and saves a valid cryptocurrency', async () => {
     const validCrypto = new Cryptocurrency({
       name: 'Bitcoin',
@@ -80,5 +78,6 @@ describe('Cryptocurrency Model', () => {
     expect(err).toBeDefined()
     expect(err.errors.symbol).toBeDefined()
   })
-
 })
+
+

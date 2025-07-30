@@ -1,45 +1,46 @@
+import 'dotenv/config'
 import mongoose from 'mongoose'
-import { MongoMemoryServer } from 'mongodb-memory-server'
 import LoanRequest from '../../models/loan_request.js'
 import User from '../../models/user.js'
 import InterestTerm from '../../models/interest_term.js'
 import Cryptocurrency from '../../models/cryptocurrency.js'
 
-
-let mongo
+let user, interestTerm, crypto
 
 beforeAll(async () => {
-  mongo = await MongoMemoryServer.create()
-  const uri = mongo.getUri()
-
+  const uri = process.env.DATABASE_URL
   await mongoose.connect(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
+
+  // Ensure indexes are applied fresh
+  // Ensure indexes are applied fresh
+  await mongoose.connection.db.dropDatabase()
+  await User.syncIndexes()
+  await LoanRequest.syncIndexes()
+  await InterestTerm.syncIndexes()
+  await Cryptocurrency.syncIndexes()
 })
 
-afterAll(async () => {
-  await mongoose.connection.dropDatabase()
-  await mongoose.connection.close()
-  await mongo.stop()
-})
-
-afterEach(async () => {
+beforeEach(async () => {
+  // Clear all collections
   const collections = mongoose.connection.collections
   for (const key in collections) {
     await collections[key].deleteMany({})
   }
+
+  // Create and assign shared models for tests
+  user = await User.create({ email: `user${Date.now()}@example.com`, password: 'Password123' })
+  interestTerm = await InterestTerm.create({ loan_length: 6, interest_rate: 10 })
+  crypto = await Cryptocurrency.create({ name: 'Bitcoin', symbol: 'BTC' })
+})
+
+afterAll(async () => {
+  await mongoose.connection.close()
 })
 
 describe('LoanRequest model', () => {
-  let user, interestTerm, crypto
-
-  beforeEach(async () => {
-    user = await User.create({ email: 'test@example.com', password: 'Password123' })
-    interestTerm = await InterestTerm.create({ loan_length: 6, interest_rate: 10 })
-    crypto = await Cryptocurrency.create({ name: 'Bitcoin', symbol: 'BTC' })
-  })
-
   test('creates a valid loan request', async () => {
     const loan = new LoanRequest({
       borrower_id: user._id,
@@ -59,7 +60,6 @@ describe('LoanRequest model', () => {
 
   test('throws error if required fields are missing', async () => {
     const loan = new LoanRequest({})
-
     await expect(loan.save()).rejects.toThrow()
   })
 

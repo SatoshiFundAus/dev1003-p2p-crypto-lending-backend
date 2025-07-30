@@ -1,6 +1,46 @@
 # P2P Crypto Lending Backend
 A secure and efficient backend system for peer-to-peer cryptocurrency lending, built with Node.js and Express.
 
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Live Backend](#live-backend)
+- [Features](#features)
+- [Current Limitations](#current-limitations)
+- [Future Plans](#future-plans)
+- [Github](#github)
+- [Frontend Integration](#frontend-integration)
+- [Tech Stack](#tech-stack)
+- [Hardware Requirements](#hardware-requirements)
+- [Code Style](#code-style)
+- [Installation](#installation)
+- [API Endpoints](#api-endpoints)
+  - [Authentication & User Management](#authentication--user-management)
+  - [User Management](#user-management)
+  - [Loan Requests](#loan-requests)
+  - [Deals](#deals)
+  - [Collateral](#collateral)
+  - [Transactions](#transactions)
+  - [Interest Terms](#interest-terms)
+  - [Cryptocurrency](#cryptocurrency)
+  - [Wallets](#wallets)
+  - [Health Check](#health-check)
+  - [Error Responses](#error-responses)
+- [Security Features](#security-features)
+- [Development](#development)
+  - [Development Server](#development-server)
+  - [Testing](#testing)
+- [Database Seeding](#database-seeding)
+- [Docker & Containerisation](#docker--containerisation)
+- [Contributing](#contributing)
+- [Technology Decisions and Alternatives](#technology-decisions-and-alternatives)
+- [Team](#team)
+- [License](#license)
+- [Package Licensing](#package-licensing)
+- [Project References](#project-references)
+
 ## Overview
 SatoshiFund is a back-end API built for a peer-to-peer cryptocurrency lending platform. It enables users to securely lend and borrow crypto assets, manage collateral, and track deals and transactions. The app simulates core lending workflows and adheres to industry-standard practices for authentication, data validation, and route protection.
 
@@ -150,29 +190,30 @@ If this project were to scale, adopting a formal style guide (e.g., ESLint with 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/SatoshiFundAus/dev1003-p2p-crypto-lending-backend
-cd dev1003-p2p-crypto-lending-backend
+git clone https://github.com/TysonPWilliams/MERN-Project-Backend
+cd MERN-Project-Backend
 ```
 
 2. Install dependencies:
 ```bash
-npm install
+npm install && npm install --save-dev
 ```
 
 3. Create a `.env` file in the root directory with the following variables:
 ```env
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
-PORT=8080
-FRONTEND_URL=your_frontend_url
+PORT=3000
 ```
+
+***Note: If using the project in a Docker container, please reference DOCKER.md and look at the [Environment Variables](./DOCKER.md#environment-variables) section.***
 
 4. Start the server:
 ```bash
 npm start
 ```
 
-The server will start on port 8080 by default.
+The server will start on port 3000 by default.
 
 ## API Endpoints
 
@@ -537,6 +578,9 @@ The project includes a seed script that populates the database with initial data
    - Sample cryptocurrency data
    - Interest terms
    - Loan requests
+
+## Docker & Containerisation
+For Docker container setup, image naming conventions, testing containers, and seeding, please refer to the Docker Setup Guide (DOCKER.md)
 
 ## Contributing
 
